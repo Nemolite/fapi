@@ -48,7 +48,7 @@
 
 
 ## Использованный материал
-- [Документация (Официальный сайт FastAPI)]([https://www.djangoproject.com/](https://fastapi.tiangolo.com/ru/tutorial/first-steps/)
+- [Документация (Официальный сайт FastAPI)](https://fastapi.tiangolo.com/)
 - [YouTube](https://www.youtube.com/watch?v=7IdfnjXsdN4&list=PLeLN0qH0-mCVQKZ8-W1LhxDcVlWtTALCS&index=1)
 
 ### Helper (Набор команд и настроек для разработки проекта)
