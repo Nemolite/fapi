@@ -1,5 +1,9 @@
+from typing import Union
 from enum import Enum
 from fastapi import FastAPI
+
+from pydantic import BaseModel
+
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
@@ -67,13 +71,73 @@ async def read_item(skip: int = 0, limit: int = 10):
 # другое, он будет преобразован в логический тип данных
 
 # http://127.0.0.1:8000/itemsbool/foo?short=1
+# обратите внимание на параметр q
+# http://127.0.0.1:8000/itemsbool/foo?q=example&short=1
 async def read_item(item_id: str, q: str | None = None, short: bool = False):
     item = {"item_id": item_id,"short":short}
     if q:
         item.update({"q": q})
     if not short:
         item.update(
-            {"description": "This is an amazing item that has a long description"}
+            {"description": "Данная запись появилась,т.к bool = False"}
         )
     return item
+
+# Смешивание query-параметров и path-параметров
+
+@app.get("/users/{user_id}/items/{item_id}")
+# user_id - int, item_id  -строку
+# q можно не указывать, тогда будет None, если указать то строка
+# short - bool, по умолчанию False
+# http://127.0.0.1:8000/users/12/items/str_item_id?q=example&short=yes
+# {"item_id":"str_item_id","owner_id":12,"q":"example"}
+
+async def read_user_item(user_id: int, item_id: str, q: str | None = None, short: bool = False):
+    item = {"item_id": item_id, "owner_id": user_id}
+    if q:
+        item.update({"q": q})
+    if not short:
+        item.update(
+            {"description": "Данная запись появилась,т.к bool = False"}
+        )
+    return item
+##############################################
+#                 Тело запроса               #
+##############################################
+
+class Item(BaseModel):
+    name: str
+    description: Union[str, None] = None
+    price: float
+    tax: Union[float, None] = None
+
+@app.post("/itemsbasamodel/")
+async def create_item(item: Item):
+    return item
+
+# Использование модели
+
+@app.post("/itemsmodel/")
+async def create_item(item: Item):
+    item_dict = item.dict()
+    if item.tax:
+        price_with_tax = item.price + item.tax
+        item_dict.update({"price_with_tax": price_with_tax})
+    return item_dict
+
+# Тело запроса + параметры пути
+
+@app.put("/items/{item_id}")
+async def create_item(item_id: int, item: Item):
+    return {"item_id": item_id, **item.dict()}
+
+# Тело запроса + параметры пути + параметры запроса
+
+@app.put("/items/{item_id}")
+async def create_item(item_id: int, item: Item, q: Union[str, None] = None):
+    result = {"item_id": item_id, **item.dict()}
+    if q:
+        result.update({"q": q})
+    return result
+
 
