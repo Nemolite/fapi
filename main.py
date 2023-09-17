@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import  Column, Integer, String
+from sqlalchemy.orm import sessionmaker
 
 # Подключение к базе данных
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:12345678@localhost/mybasa"
@@ -31,6 +32,18 @@ Base.metadata.create_all(bind=engine)
 
 # Завершение работы с базами данных
 
+# Подгтовка к записи в базу данных
+# True - изменяет записи
+SessionLocal = sessionmaker(autoflush=True, bind=engine)
+db = SessionLocal()
+
+# создаем объект Person для добавления в бд
+tom = Person(name="Tom", age=38)
+db.add(tom)     # добавляем в бд
+db.commit()     # сохраняем изменения
+
+print(tom.id)
+
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
@@ -38,6 +51,11 @@ class ModelName(str, Enum):
     lenet = "lenet"
 
 app = FastAPI()
+
+@app.get("/db")
+async def basa():
+    people = db.query(Person).all()
+    return people
 
 fake_data = [
     {"id":1,"name": "Harry Potter","city": "London"},
