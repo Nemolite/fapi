@@ -1,8 +1,35 @@
+# pip install SQLAlchemy
+# pip install psycopg2
 from typing import Union
 from enum import Enum
 from fastapi import FastAPI
-
 from pydantic import BaseModel
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import  Column, Integer, String
+
+# Подключение к базе данных
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:12345678@localhost/mybasa"
+
+# создаем движок SqlAlchemy
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+print(engine)
+
+#создаем базовый класс для моделей
+Base = declarative_base()
+
+# создаем модель, объекты которой будут храниться в бд
+class Person(Base):
+    __tablename__ = "people"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    age = Column(Integer, )
+
+# создаем таблицы
+Base.metadata.create_all(bind=engine)
+
+# Завершение работы с базами данных
 
 
 class ModelName(str, Enum):
