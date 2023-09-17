@@ -37,12 +37,7 @@ Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autoflush=True, bind=engine)
 db = SessionLocal()
 
-# создаем объект Person для добавления в бд
-tom = Person(name="Tom", age=38)
-db.add(tom)     # добавляем в бд
-db.commit()     # сохраняем изменения
 
-print(tom.id)
 
 
 class ModelName(str, Enum):
@@ -52,10 +47,37 @@ class ModelName(str, Enum):
 
 app = FastAPI()
 
+# Добавление данных
+@app.get("/ins")
+async def ins():
+    # создаем объект Person для добавления в бд
+    tom = Person(name="Tom", age=38)
+    db.add(tom)  # добавляем в бд
+    db.commit()  # сохраняем изменения
+
+    print(tom.id)
+
+# Получение данных
 @app.get("/db")
 async def basa():
     people = db.query(Person).all()
     return people
+
+# Обновление данных
+@app.get("/update/{user_id}/{name_user}")
+async def updater(user_id: int, nmae_user:str):
+    # получаем один объект по ID
+    result = db.query(Person).filter(Person.id == user_id).first()
+
+    # изменениям значения
+    result.name = nmae_user
+    result.age = 22
+
+    db.commit()  # сохраняем изменения
+
+    # проверяем, что изменения применены в бд - получаем один объект, у которого имя - Tomas
+    return db.query(Person).filter(Person.id == user_id).first()
+
 
 fake_data = [
     {"id":1,"name": "Harry Potter","city": "London"},
