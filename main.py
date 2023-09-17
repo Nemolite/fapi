@@ -78,6 +78,12 @@ async def updater(user_id: int, nmae_user:str):
     # проверяем, что изменения применены в бд - получаем один объект, у которого имя - Tomas
     return db.query(Person).filter(Person.id == user_id).first()
 
+# Удаление данных
+@app.get("/dele/{user_id}")
+async def dele(user_id:int):
+    object_user = db.query(Person).filter(Person.id == user_id).first()
+    db.delete(object_user)  # удаляем объект
+    db.commit()  # сохраняем изменения
 
 fake_data = [
     {"id":1,"name": "Harry Potter","city": "London"},
