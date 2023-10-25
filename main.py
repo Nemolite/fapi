@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import  Column, Integer, String
 from sqlalchemy.orm import sessionmaker
+from jose import JWTError, jwt
 
 # Подключение к базе данных
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:12345678@localhost/mybasa"
@@ -36,9 +37,6 @@ Base.metadata.create_all(bind=engine)
 # True - изменяет записи
 SessionLocal = sessionmaker(autoflush=True, bind=engine)
 db = SessionLocal()
-
-
-
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
@@ -198,6 +196,20 @@ async def create_item(item: Item):
         item_dict.update({"price_with_tax": price_with_tax})
     return item_dict
 
+@app.post("/test/")
+async def testing(login: str, password: str):
+    print(login)
+    print(password)
+
+    payload = {
+        "login": login,
+    }
+    SECRET_KEY ='saff23r23dfAD32'
+    token = jwt.encode(payload, SECRET_KEY,algorithm="HS256")
+    return token
+
+
+
 # Тело запроса + параметры пути
 
 @app.put("/items/{item_id}")
@@ -212,6 +224,3 @@ async def create_item(item_id: int, item: Item, q: Union[str, None] = None):
     if q:
         result.update({"q": q})
     return result
-
-
-
